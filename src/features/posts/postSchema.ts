@@ -45,7 +45,12 @@ export class Post {
       blogName: this.blogName,
       content: this.content,
       shortDescription: this.shortDescription,
-      extendedLikesInfo: { ...this.likesInfo, myStatus, newestLikes },
+      extendedLikesInfo: {
+        likesCount: this.likesInfo.likesCount,
+        dislikesCount: this.likesInfo.dislikesCount,
+        myStatus,
+        newestLikes,
+      },
     };
   }
 

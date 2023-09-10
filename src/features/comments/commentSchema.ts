@@ -45,12 +45,17 @@ export class Comment {
     return {
       content: this.content,
       commentatorInfo: this.commentatorInfo,
-      likesInfo: { ...this.likesInfo, myStatus },
+      likesInfo: {
+        likesCount: this.likesInfo.likesCount,
+        dislikesCount: this.likesInfo.dislikesCount,
+        myStatus,
+      },
       id: this._id.toString(),
       createdAt: this.createdAt,
     };
   }
 }
+
 export const CommentSchema = SchemaFactory.createForClass(Comment);
 
 CommentSchema.methods = {
