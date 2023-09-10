@@ -16,9 +16,9 @@ export class Blog {
   description: string;
   @Prop({ required: true })
   websiteUrl: string;
-  @Prop({ required: true })
+  @Prop({ required: true, default: new Date().toISOString() })
   createdAt: string;
-  @Prop({ required: true })
+  @Prop({ type: Boolean, required: true, default: false })
   isMembership: boolean;
 
   updateBlogInfo(blog: BlogDocument, updatedData: BlogUpdateType): void {
@@ -53,7 +53,7 @@ BlogSchema.methods = {
   updateBlogInfo: Blog.prototype.updateBlogInfo,
 };
 BlogSchema.statics = {
-  modifyIntoViewModel: Blog.createInstance,
+  createInstance: Blog.createInstance,
 };
 
 type BlogModelStaticMethodsType = {
