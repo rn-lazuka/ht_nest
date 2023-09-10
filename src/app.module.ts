@@ -17,6 +17,8 @@ import { BlogsService } from './features/blogs/blogsService';
 import { PostsService } from './features/posts/application/postsService';
 import { BlogsRepository } from './features/blogs/blogsRepository';
 import { PostsRepository } from './features/posts/postsRepository';
+import { TestsRepository } from './features/tests/testsRepository';
+import { TestsController } from './features/tests/testsController';
 
 console.log(process.env.MONGO_URL);
 
@@ -48,6 +50,7 @@ console.log(process.env.MONGO_URL);
     CommentsController,
     BlogsController,
     PostsController,
+    TestsController,
   ],
   providers: [
     UsersService,
@@ -57,6 +60,7 @@ console.log(process.env.MONGO_URL);
     BlogsRepository,
     PostsRepository,
     CommentsRepository,
+    TestsRepository,
   ],
 })
 export class AppModule {}
