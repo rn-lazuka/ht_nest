@@ -90,11 +90,11 @@ export class PostsRepository {
 
     const paramsOfElems = getQueryParams(query);
     const posts: PostDocument[] = await this.postModel
-      .find()
+      .find({ blogId })
       .skip((paramsOfElems.pageNumber - 1) * paramsOfElems.pageSize)
       .limit(paramsOfElems.pageSize)
       .sort(paramsOfElems.paramSort);
-    const totalCount = await this.postModel.countDocuments();
+    const totalCount = await this.postModel.countDocuments({ blogId });
 
     const postsWithLikes = await Promise.all(
       posts.map(async (post) => {
