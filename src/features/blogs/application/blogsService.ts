@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogModelType } from './blogSchema';
-import { BlogsRepository } from './blogsRepository';
+import { Blog, BlogModelType } from '../blogSchema';
+import { BlogsRepository } from '../blogsRepository';
 import {
-  BlogUpdateType,
+  UpdateBlogModel,
   CreateBlogModel,
-} from './models/input/blog.input.model';
-import { BlogViewType } from './models/output/blog.output.model';
+} from '../models/input/blog.input.model';
+import { BlogViewType } from '../models/output/blog.output.model';
 
 @Injectable()
 export class BlogsService {
@@ -19,10 +19,10 @@ export class BlogsService {
   async createBlog(createBlogModel: CreateBlogModel): Promise<BlogViewType> {
     const blog = this.blogModel.createInstance(createBlogModel, this.blogModel);
     await this.blogsRepository.save(blog);
-    return blog.modifyIntoViewModel();
+    return blog.convertToViewModel();
   }
 
-  async updateBlog(id: string, blogBody: BlogUpdateType): Promise<boolean> {
+  async updateBlog(id: string, blogBody: UpdateBlogModel): Promise<boolean> {
     const blog = await this.blogsRepository.getBlogInstance(id);
     if (!blog) {
       return false;

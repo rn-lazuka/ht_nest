@@ -8,39 +8,44 @@ import {
   CommentsPaginationType,
   CommentViewType,
 } from './models/output/comment.output.model';
+import { LikesInfoQueryRepository } from '../likes-info/infrastructure/query.repository/likes-info.query.repository';
+import { PostQueryModel } from '../posts/models/input/post.input.model';
+import { CommentsLikesInfoDBType } from '../likes-info/domain/types';
 
 @Injectable()
-export class CommentsRepository {
+export class CommentsQueryRepository {
   constructor(
     @InjectModel(Comment.name) private commentModel: CommentModelType,
+    private likesInfoQueryRepository: LikesInfoQueryRepository,
   ) {}
 
   async getCommentById(
     commentId: string,
-    // userId?: string
+    userId?: string,
   ): Promise<CommentViewType | null> {
     const result = await this.commentModel.findById(commentId);
     if (!result) {
       return null;
     }
-    const myStatus = LikeStatus.None;
+    let myStatus = LikeStatus.None;
 
-    // if (userId) {
-    //   const likeInfo = await this.likesRepository.getCommentLikeInfo(
-    //     userId,
-    //     commentId,
-    //   );
-    //   if (likeInfo) {
-    //     myStatus = likeInfo.likeStatus;
-    //   }
-    // }
-    return result.modifyIntoViewModel(myStatus);
+    if (userId) {
+      const likeInfo =
+        await this.likesInfoQueryRepository.getCommentLikesInfoByUserId(
+          commentId,
+          userId,
+        );
+      if (likeInfo) {
+        myStatus = likeInfo.likeStatus;
+      }
+    }
+    return result.convertToViewModel(myStatus);
   }
 
   async getCommentsByPostId(
     postId: string,
-    query: CommentQueryModel,
-    userId?: string,
+    query: CommentQueryModel | PostQueryModel,
+    userId: string | null,
   ): Promise<CommentsPaginationType> {
     const paramsOfElems = getQueryParams(query);
     const commentsCount = await this.commentModel.countDocuments({ postId });
@@ -52,18 +57,19 @@ export class CommentsRepository {
 
     const commentsWithLikes = await Promise.all(
       comments.map(async (comment) => {
-        // let likeInfo: CommentLikeDBType | null = null;
-        const myStatus = LikeStatus.None;
-        // if (userId) {
-        //   likeInfo = await this.likesRepository.getCommentLikeInfo(
-        //     userId,
-        //     comment._id.toString(),
-        //   );
-        // }
-        // if (likeInfo) {
-        //   myStatus = likeInfo.likeStatus;
-        // }
-        return comment.modifyIntoViewModel(myStatus);
+        let likeInfo: CommentsLikesInfoDBType | null = null;
+        let myStatus = LikeStatus.None;
+        if (userId) {
+          likeInfo =
+            await this.likesInfoQueryRepository.getCommentLikesInfoByUserId(
+              comment._id.toString(),
+              userId,
+            );
+        }
+        if (likeInfo) {
+          myStatus = likeInfo.likeStatus;
+        }
+        return comment.convertToViewModel(myStatus);
       }),
     );
 

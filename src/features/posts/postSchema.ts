@@ -23,7 +23,7 @@ export class Post {
   @Prop({ required: true })
   blogName: string;
   @Prop({ required: true })
-  createdAt: string;
+  createdAt: Date;
   @Prop({ required: true, type: LikesInfoSchema })
   likesInfo: LikesInfo;
 
@@ -33,13 +33,13 @@ export class Post {
     this.content = data.content;
   }
 
-  modifyIntoViewModel(
+  convertToViewModel(
     myStatus: LikeStatus,
     newestLikes: NewLike[],
   ): PostViewType {
     return {
       id: this._id.toString(),
-      createdAt: this.createdAt,
+      createdAt: this.createdAt.toISOString(),
       title: this.title,
       blogId: this.blogId,
       blogName: this.blogName,
@@ -77,7 +77,7 @@ export class Post {
 export const PostSchema = SchemaFactory.createForClass(Post);
 
 PostSchema.methods = {
-  modifyIntoViewModel: Post.prototype.modifyIntoViewModel,
+  convertToViewModel: Post.prototype.convertToViewModel,
   updatePostInfo: Post.prototype.updatePostInfo,
 };
 PostSchema.statics = {

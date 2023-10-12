@@ -8,32 +8,35 @@ import {
   Post,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { UsersRepository } from './usersRepository';
-import { UsersService } from './usersService';
 import { UserQueryModel } from './types';
 import { HTTP_STATUS_CODE } from '../../infrastructure/helpers/enums/http-status';
-import { CreateUserModel } from './models/input/user.input.model';
 import {
   UserViewType,
   ViewAllUsersModels,
 } from './models/output/user.output.model';
+import { UsersService } from './application/usersService';
+import { UsersQueryRepository } from './users.query-repository';
+import { CreateUserInputModel } from './models/input/create-user.input.model';
+import { BasicAuthGuard } from '../../infrastructure/guards/basic-auth.guard';
 
 @Controller('/users')
 export class UsersController {
   constructor(
-    protected usersRepository: UsersRepository,
+    protected usersQueryRepository: UsersQueryRepository,
     protected usersService: UsersService,
   ) {}
 
+  @UseGuards(BasicAuthGuard)
   @Get()
   async getAllUsers(
     @Query() query: UserQueryModel,
     @Res() res: Response<ViewAllUsersModels | string>,
   ) {
     try {
-      const result = await this.usersRepository.getAllUsers(query);
+      const result = await this.usersQueryRepository.getAllUsers(query);
       res.status(HTTP_STATUS_CODE.OK_200).send(result);
     } catch (err) {
       throw new InternalServerErrorException(
@@ -42,9 +45,10 @@ export class UsersController {
     }
   }
 
+  @UseGuards(BasicAuthGuard)
   @Post()
   async createUser(
-    @Body() inputUserModel: CreateUserModel,
+    @Body() inputUserModel: CreateUserInputModel,
     @Res() res: Response<UserViewType | string>,
   ) {
     try {
@@ -57,6 +61,7 @@ export class UsersController {
     }
   }
 
+  @UseGuards(BasicAuthGuard)
   @Delete(':id')
   async deleteUser(@Param('id') userId: string, @Res() res: Response<void>) {
     try {

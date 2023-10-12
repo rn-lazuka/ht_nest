@@ -27,14 +27,14 @@ export class BlogsRepository {
       page: paramsOfElems.pageNumber,
       pageSize: paramsOfElems.pageSize,
       totalCount: blogsCount,
-      items: blogs.map((p) => p.modifyIntoViewModel()),
+      items: blogs.map((p) => p.convertToViewModel()),
     };
   }
 
   async getBlogById(id: string): Promise<BlogViewType | null> {
     const blog = await this.blogModel.findById(id);
     if (!blog) return null;
-    return blog.modifyIntoViewModel();
+    return blog.convertToViewModel();
   }
 
   async getBlogInstance(blogId: string): Promise<null | BlogDocument> {

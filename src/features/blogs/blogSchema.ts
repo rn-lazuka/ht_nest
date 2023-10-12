@@ -3,7 +3,7 @@ import { BlogViewType } from './models/output/blog.output.model';
 import { HydratedDocument, Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import {
-  BlogUpdateType,
+  UpdateBlogModel,
   CreateBlogModel,
 } from './models/input/blog.input.model';
 
@@ -21,7 +21,7 @@ export class Blog {
   @Prop({ type: Boolean, required: true, default: false })
   isMembership: boolean;
 
-  updateBlogInfo(blog: BlogDocument, updatedData: BlogUpdateType): void {
+  updateBlogInfo(blog: BlogDocument, updatedData: UpdateBlogModel): void {
     blog.name = updatedData.name;
     blog.description = updatedData.description;
     blog.websiteUrl = updatedData.websiteUrl;
@@ -34,7 +34,7 @@ export class Blog {
     return new BlogModel(blogDTO);
   }
 
-  modifyIntoViewModel(): BlogViewType {
+  convertToViewModel(): BlogViewType {
     return {
       id: this._id.toString(),
       name: this.name,
@@ -49,7 +49,7 @@ export class Blog {
 export const BlogSchema = SchemaFactory.createForClass(Blog);
 
 BlogSchema.methods = {
-  modifyIntoViewModel: Blog.prototype.modifyIntoViewModel,
+  convertToViewModel: Blog.prototype.convertToViewModel,
   updateBlogInfo: Blog.prototype.updateBlogInfo,
 };
 BlogSchema.statics = {

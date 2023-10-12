@@ -13,7 +13,7 @@ import {
 import { BlogsRepository } from './blogsRepository';
 import {
   BlogQueryModel,
-  BlogUpdateType,
+  UpdateBlogModel,
   CreateBlogModel,
 } from './models/input/blog.input.model';
 import {
@@ -22,23 +22,23 @@ import {
 } from './models/output/blog.output.model';
 import { Response } from 'express';
 import { HTTP_STATUS_CODE } from '../../infrastructure/helpers/enums/http-status';
-import { BlogsService } from './blogsService';
 import {
   PostsPaginationType,
   PostViewType,
 } from '../posts/models/output/post.output.model';
-import { PostsRepository } from '../posts/postsRepository';
 import { PostsService } from '../posts/application/postsService';
 import {
   PostCreateFromBlogModel,
   PostCreateModel,
 } from '../posts/models/input/post.input.model';
+import { BlogsService } from './application/blogsService';
+import { PostsQueryRepository } from '../posts/postsQueryRepository';
 
 @Controller('/blogs')
 export class BlogsController {
   constructor(
     protected blogsRepository: BlogsRepository,
-    protected postsRepository: PostsRepository,
+    protected postsQueryRepository: PostsQueryRepository,
     protected postsService: PostsService,
     protected blogsService: BlogsService,
   ) {}
@@ -73,6 +73,19 @@ export class BlogsController {
     }
   }
 
+  @Post(`/:blogId/posts`)
+  async createPostByBlogId(
+    @Param('blogId') blogId: string,
+    @Body() inputPostModel: PostCreateFromBlogModel,
+    @Res() res: Response<PostViewType>,
+  ) {
+    const postData: PostCreateModel = { blogId, ...inputPostModel };
+    const result = await this.postsService.createPost(postData);
+    result
+      ? res.status(HTTP_STATUS_CODE.CREATED_201).send(result)
+      : res.sendStatus(HTTP_STATUS_CODE.NOT_FOUND_404);
+  }
+
   @Get(':id')
   async getBlogById(
     @Param('id') blogId: string,
@@ -87,7 +100,7 @@ export class BlogsController {
   @Put(':id')
   async updateBlog(
     @Param('id') blogId: string,
-    @Body() dataForUpdate: BlogUpdateType,
+    @Body() dataForUpdate: UpdateBlogModel,
     @Res() res: Response<void>,
   ) {
     const result = await this.blogsService.updateBlog(blogId, dataForUpdate);
@@ -117,22 +130,12 @@ export class BlogsController {
     @Query() query: BlogQueryModel,
     @Res() res: Response<PostsPaginationType>,
   ) {
-    const result = await this.postsRepository.getAllPostsForBlog(blogId, query);
+    const result = await this.postsQueryRepository.getAllPostsForBlog(
+      blogId,
+      query,
+    );
     result
       ? res.status(HTTP_STATUS_CODE.OK_200).send(result)
-      : res.sendStatus(HTTP_STATUS_CODE.NOT_FOUND_404);
-  }
-
-  @Post(`/:blogId/posts`)
-  async createPostByBlogId(
-    @Param('blogId') blogId: string,
-    @Body() inputPostModel: PostCreateFromBlogModel,
-    @Res() res: Response<PostViewType>,
-  ) {
-    const postData: PostCreateModel = { blogId, ...inputPostModel };
-    const result = await this.postsService.createPost(postData);
-    result
-      ? res.status(HTTP_STATUS_CODE.CREATED_201).send(result)
       : res.sendStatus(HTTP_STATUS_CODE.NOT_FOUND_404);
   }
 }

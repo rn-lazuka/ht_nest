@@ -30,3 +30,9 @@ export type UserDBType = {
     expirationDate: Date;
   };
 };
+
+export interface EmailConfirmationInfo {
+  confirmationCode: string;
+  expirationDate: Date;
+  isConfirmed: boolean;
+}

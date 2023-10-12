@@ -54,7 +54,7 @@ export class User {
   @Prop({ type: PasswordRecoverySchema, required: false })
   passwordRecovery: PasswordRecovery;
 
-  modifyIntoViewModel(): UserViewType {
+  convertToViewModel(): UserViewType {
     return {
       id: this._id.toString(),
       login: this.login,
@@ -78,7 +78,7 @@ UserSchema.statics = {
 };
 
 UserSchema.methods = {
-  modifyIntoViewModel: User.prototype.modifyIntoViewModel,
+  convertToViewModel: User.prototype.convertToViewModel,
 };
 
 type UserModelStaticMethodsType = {

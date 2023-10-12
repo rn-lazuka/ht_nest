@@ -1,48 +1,51 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, UserModelType } from './userSchema';
-import { EmailAndLoginTerm, UserQueryModel } from './types';
-import { getQueryParams } from '../../infrastructure/utils/getQueryParams';
-import { UsersPaginationType } from './models/output/user.output.model';
+import { EmailConfirmationInfo } from './types';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class UsersRepository {
   constructor(@InjectModel(User.name) private userModel: UserModelType) {}
 
-  async getAllUsers(query: UserQueryModel): Promise<UsersPaginationType> {
-    const emailAndLoginTerm: EmailAndLoginTerm = [];
-    const paramsOfElems = getQueryParams(query);
-
-    if (!!query?.searchEmailTerm)
-      emailAndLoginTerm.push({
-        email: { $regex: query.searchEmailTerm, $options: 'i' },
-      });
-    if (!!query?.searchLoginTerm)
-      emailAndLoginTerm.push({
-        login: { $regex: query.searchLoginTerm, $options: 'i' },
-      });
-    const filters =
-      emailAndLoginTerm.length > 0 ? { $or: emailAndLoginTerm } : {};
-    const allUsersCount = await this.userModel.countDocuments(filters);
-
-    const allUsersOnPages = await this.userModel
-      .find(filters)
-      .skip((paramsOfElems.pageNumber - 1) * paramsOfElems.pageSize)
-      .limit(paramsOfElems.pageSize)
-      .sort(paramsOfElems.paramSort);
-
-    return {
-      pagesCount: Math.ceil(allUsersCount / paramsOfElems.pageSize),
-      page: paramsOfElems.pageNumber,
-      pageSize: paramsOfElems.pageSize,
-      totalCount: allUsersCount,
-      items: allUsersOnPages.map((p) => p.modifyIntoViewModel()),
-    };
-  }
-
   async save(user: UserDocument): Promise<void> {
     await user.save();
     return;
+  }
+
+  async updateUserConfirmationData(id: string, data: EmailConfirmationInfo) {
+    const result = await this.userModel.findByIdAndUpdate(
+      id,
+      { emailConfirmation: data },
+      { new: true },
+    );
+    return result;
+  }
+
+  async updatePassword(passwordHash: string, id: ObjectId): Promise<boolean> {
+    const result = await this.userModel.updateOne(
+      { _id: id },
+      { $set: { passwordHash } },
+    );
+    return result.modifiedCount === 1;
+  }
+
+  async updatePasswordRecoveryCode(
+    id: ObjectId,
+    newCode: string,
+    newDate: Date,
+  ): Promise<boolean> {
+    const result = await this.userModel.updateOne(
+      { _id: id },
+      {
+        $set: {
+          'passwordRecovery.confirmationCode': newCode,
+          'passwordRecovery.expirationDate': newDate,
+        },
+      },
+    );
+
+    return result.modifiedCount === 1;
   }
 
   async deleteUser(id: string) {

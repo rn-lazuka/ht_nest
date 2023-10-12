@@ -41,7 +41,29 @@ export class Comment {
   @Prop({ required: true, type: LikesInfoSchema })
   likesInfo: LikesInfo;
 
-  modifyIntoViewModel(myStatus: LikeStatus): CommentViewType {
+  static createInstance(
+    content: string,
+    userId: string,
+    userLogin: string,
+    postId: string,
+    CommentModel: CommentModelType,
+  ): CommentDocument {
+    return new CommentModel({
+      _id: new ObjectId(),
+      content,
+      commentatorInfo: {
+        userId,
+        userLogin,
+      },
+      postId,
+      likesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+      },
+    });
+  }
+
+  convertToViewModel(myStatus: LikeStatus): CommentViewType {
     return {
       content: this.content,
       commentatorInfo: this.commentatorInfo,
@@ -59,9 +81,24 @@ export class Comment {
 export const CommentSchema = SchemaFactory.createForClass(Comment);
 
 CommentSchema.methods = {
-  modifyIntoViewModel: Comment.prototype.modifyIntoViewModel,
+  convertToViewModel: Comment.prototype.convertToViewModel,
+};
+
+CommentSchema.statics = {
+  createInstance: Comment.createInstance,
+};
+
+type CommentModelStaticMethodsType = {
+  createInstance: (
+    content: string,
+    userId: string,
+    userLogin: string,
+    postId: string,
+    CommentModel: CommentModelType,
+  ) => CommentDocument;
 };
 
 export type CommentDocument = HydratedDocument<Comment>;
 
-export type CommentModelType = Model<CommentDocument>;
+export type CommentModelType = Model<CommentDocument> &
+  CommentModelStaticMethodsType;
