@@ -8,7 +8,6 @@ import {
   UserInfoType,
 } from './dto/auth.dto.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { User, UserModelType } from '../../users/userSchema';
 import { UsersRepository } from '../../users/usersRepository';
 import { UsersQueryRepository } from '../../users/users.query-repository';
@@ -16,6 +15,7 @@ import { EmailConfirmationInfo, UserDBType } from '../../users/types';
 import { RegisterUserModel } from '../../users/models/input/user.input.model';
 import { CryptoAdapter } from '../../../infrastructure/adapters/crypto.adapter';
 import { EmailManager } from '../../../infrastructure/managers/email-manager';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {

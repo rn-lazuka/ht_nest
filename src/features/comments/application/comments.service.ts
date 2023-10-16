@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../../posts/postSchema';
-import { CommentModelType } from '../commentSchema';
+import { CommentModelType, Comment } from '../commentSchema';
 import { UsersQueryRepository } from '../../users/users.query-repository';
 import { CommentsQueryRepository } from '../comments.query-repository';
 import { CommentsRepository } from '../comments.repository';

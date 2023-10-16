@@ -31,7 +31,6 @@ import { BlogsRepository } from './features/blogs/blogsRepository';
 import { PostsRepository } from './features/posts/postsRepository';
 import { TestsRepository } from './features/tests/testsRepository';
 import { TestsController } from './features/tests/testsController';
-import { JwtService } from './features/jwt/jwt.service';
 import { AuthController } from './features/auth/api/auth.controller';
 import { DevicesController } from './features/devices/api/devices.controller';
 import { AuthService } from './features/auth/application/auth.service';
@@ -67,15 +66,20 @@ import {
 import { Device, DeviceSchema } from './features/devices/domain/device.schema';
 import { BlogsService } from './features/blogs/application/blogsService';
 import { UsersService } from './features/users/application/usersService';
+import { JwtService } from './features/jwt/jwt.service';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot({
-      ttl: 10,
-      limit: 5,
-    }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10,
+        limit: 5,
+      },
+    ]),
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGO_URL!),
+    JwtModule.register({}),
     MongooseModule.forFeature([
       {
         name: User.name,

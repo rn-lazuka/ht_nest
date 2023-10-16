@@ -2,17 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   CommentLikesInfo,
-  PostLikesInfo,
-} from '../../domain/comment-likes-info.schema';
-import {
   CommentLikesInfoDocument,
   CommentLikesInfoModelType,
+} from '../../domain/comment-likes-info.schema';
+import { PostsLikesInfoDBType } from '../../domain/types';
+import { Post, PostModelType } from '../../../posts/postSchema';
+import { CommentModelType, Comment } from '../../../comments/commentSchema';
+import {
+  PostLikesInfo,
   PostLikesInfoDocument,
   PostLikesInfoModelType,
-  PostsLikesInfoDBType,
-} from '../../domain/types';
-import { Post, PostModelType } from '../../../posts/postSchema';
-import { CommentModelType } from '../../../comments/commentSchema';
+} from '../../domain/post-likes-info.schema';
 
 @Injectable()
 export class LikesInfoRepository {
