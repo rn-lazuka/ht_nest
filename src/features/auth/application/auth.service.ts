@@ -120,10 +120,14 @@ export class AuthService {
     return;
   }
 
-  async resendConfirmationEmailMessage(
-    userId: string,
-    email: string,
-  ): Promise<void> {
+  async resendConfirmationEmailMessage(email: string): Promise<void> {
+    const user = await this.usersQueryRepository.getUserByLoginOrEmail(email);
+    if (!user) {
+      throw new Error('No user with such email');
+    }
+    if (user.emailConfirmation.isConfirmed) {
+      throw new Error('User already confirmed');
+    }
     const confirmationInfo: EmailConfirmationInfo = {
       confirmationCode: uuidv4(),
       expirationDate: add(new Date(), { hours: 5, seconds: 20 }),
@@ -131,7 +135,7 @@ export class AuthService {
     };
 
     const result = await this.usersRepository.updateUserConfirmationData(
-      userId,
+      user._id.toString(),
       confirmationInfo,
     );
     if (!result) {

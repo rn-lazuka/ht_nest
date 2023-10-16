@@ -73,13 +73,9 @@ export class AuthController {
   @Post('registration-email-resending')
   async resendEmailConfirmation(
     @Body() inputEmail: EmailResendingInputModel,
-    @CurrentUserId() userId: string,
     @Res() res: Response<string>,
   ) {
-    await this.authService.resendConfirmationEmailMessage(
-      userId,
-      inputEmail.email,
-    );
+    await this.authService.resendConfirmationEmailMessage(inputEmail.email);
     res
       .status(HTTP_STATUS_CODE.NO_CONTENT_204)
       .send(
