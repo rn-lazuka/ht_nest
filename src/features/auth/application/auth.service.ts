@@ -108,7 +108,7 @@ export class AuthService {
     }
     if (user.emailConfirmation.isConfirmed) {
       throw new BadRequestException([
-        { message: 'Email is already confirmed', field: 'email' },
+        { message: 'User is already confirmed', field: 'code' },
       ]);
     }
 
@@ -132,7 +132,9 @@ export class AuthService {
       throw new Error('No user with such email');
     }
     if (user.emailConfirmation.isConfirmed) {
-      throw new Error('User already confirmed');
+      throw new BadRequestException([
+        { message: 'User is already confirmed', field: 'email' },
+      ]);
     }
     const confirmationInfo: EmailConfirmationInfo = {
       confirmationCode: uuidv4(),
