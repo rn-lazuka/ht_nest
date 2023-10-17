@@ -100,9 +100,15 @@ export class AuthService {
     const user = await this.usersQueryRepository.getUserByConfirmationCode(
       inputConfirmationCode,
     );
+
     if (!user) {
       throw new BadRequestException([
         { message: 'Code is incorrect', field: 'code' },
+      ]);
+    }
+    if (user.emailConfirmation.isConfirmed) {
+      throw new BadRequestException([
+        { message: 'Email is already confirmed', field: 'email' },
       ]);
     }
 
