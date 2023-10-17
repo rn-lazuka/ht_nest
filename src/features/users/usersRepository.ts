@@ -21,6 +21,14 @@ export class UsersRepository {
     );
     return result;
   }
+  async updateUserConfirmationStatus(id: string) {
+    const result = await this.userModel.findByIdAndUpdate(
+      id,
+      { 'emailConfirmation.isConfirmed': true },
+      { new: true },
+    );
+    return result;
+  }
 
   async updatePassword(passwordHash: string, id: ObjectId): Promise<boolean> {
     const result = await this.userModel.updateOne(

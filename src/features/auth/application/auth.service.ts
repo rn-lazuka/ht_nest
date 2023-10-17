@@ -112,12 +112,8 @@ export class AuthService {
       ]);
     }
 
-    const result = await this.usersRepository.updateUserConfirmationData(
+    const result = await this.usersRepository.updateUserConfirmationStatus(
       user._id.toString(),
-      {
-        ...user.emailConfirmation,
-        isConfirmed: true,
-      },
     );
     if (!result) {
       throw new Error('Email confirmation failed.');
