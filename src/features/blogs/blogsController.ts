@@ -9,6 +9,7 @@ import {
   Put,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { BlogsRepository } from './blogsRepository';
 import {
@@ -33,6 +34,7 @@ import {
 } from '../posts/models/input/post.input.model';
 import { BlogsService } from './application/blogsService';
 import { PostsQueryRepository } from '../posts/postsQueryRepository';
+import { JwtAccessGuard } from '../../infrastructure/guards/jwt-access.guard';
 
 @Controller('/blogs')
 export class BlogsController {
@@ -58,6 +60,7 @@ export class BlogsController {
     }
   }
 
+  @UseGuards(JwtAccessGuard)
   @Post()
   async createBlog(
     @Body() createBlogModel: CreateBlogModel,
@@ -73,7 +76,8 @@ export class BlogsController {
     }
   }
 
-  @Post(`/:blogId/posts`)
+  @UseGuards(JwtAccessGuard)
+  @Post(`:blogId/posts`)
   async createPostByBlogId(
     @Param('blogId') blogId: string,
     @Body() inputPostModel: PostCreateFromBlogModel,
@@ -97,6 +101,7 @@ export class BlogsController {
       : res.sendStatus(HTTP_STATUS_CODE.NOT_FOUND_404);
   }
 
+  @UseGuards(JwtAccessGuard)
   @Put(':id')
   async updateBlog(
     @Param('id') blogId: string,
@@ -109,6 +114,7 @@ export class BlogsController {
     );
   }
 
+  @UseGuards(JwtAccessGuard)
   @Delete(':id')
   async deleteBlog(@Param('id') blogId: string, @Res() res: Response<void>) {
     try {
