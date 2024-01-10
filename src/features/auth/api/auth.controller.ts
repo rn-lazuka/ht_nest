@@ -18,7 +18,6 @@ import {
 } from './models/input/registration.input.model';
 import { LocalAuthGuard } from '../../../infrastructure/guards/local-auth.guard';
 import { CurrentUserId } from '../../../infrastructure/decorators/auth/current-user-id.param.decorator';
-import { ObjectId } from 'mongodb';
 import { JwtAccessGuard } from '../../../infrastructure/guards/jwt-access.guard';
 import {
   NewPasswordModel,

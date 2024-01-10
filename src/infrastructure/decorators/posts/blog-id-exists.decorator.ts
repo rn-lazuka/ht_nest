@@ -10,6 +10,7 @@ export class IsBlogByIdExistsConstraint
   implements ValidatorConstraintInterface
 {
   constructor(protected blogsRepository: BlogsRepository) {}
+
   async validate(value: string, args: ValidationArguments | any) {
     const blogId = args.object.blogId;
 

@@ -34,7 +34,7 @@ import {
 } from '../posts/models/input/post.input.model';
 import { BlogsService } from './application/blogsService';
 import { PostsQueryRepository } from '../posts/postsQueryRepository';
-import { JwtAccessGuard } from '../../infrastructure/guards/jwt-access.guard';
+import { BasicAuthGuard } from '../../infrastructure/guards/basic-auth.guard';
 
 @Controller('/blogs')
 export class BlogsController {
@@ -60,7 +60,7 @@ export class BlogsController {
     }
   }
 
-  @UseGuards(JwtAccessGuard)
+  @UseGuards(BasicAuthGuard)
   @Post()
   async createBlog(
     @Body() createBlogModel: CreateBlogModel,
@@ -76,7 +76,7 @@ export class BlogsController {
     }
   }
 
-  @UseGuards(JwtAccessGuard)
+  @UseGuards(BasicAuthGuard)
   @Post(`:blogId/posts`)
   async createPostByBlogId(
     @Param('blogId') blogId: string,
@@ -101,7 +101,7 @@ export class BlogsController {
       : res.sendStatus(HTTP_STATUS_CODE.NOT_FOUND_404);
   }
 
-  @UseGuards(JwtAccessGuard)
+  @UseGuards(BasicAuthGuard)
   @Put(':id')
   async updateBlog(
     @Param('id') blogId: string,
@@ -114,7 +114,7 @@ export class BlogsController {
     );
   }
 
-  @UseGuards(JwtAccessGuard)
+  @UseGuards(BasicAuthGuard)
   @Delete(':id')
   async deleteBlog(@Param('id') blogId: string, @Res() res: Response<void>) {
     try {
