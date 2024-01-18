@@ -50,14 +50,14 @@ export class AuthService {
     const accessToken = this.jwtService.sign(
       { userId },
       {
-        secret: process.env.JWT_SECRET,
+        secret: process.env.PRIVATE_KEY_ACCESS_TOKEN,
         expiresIn: process.env.EXPIRATION_TIME_ACCESS_TOKEN,
       },
     );
     const refreshToken = this.jwtService.sign(
       { userId, deviceId: uuidv4() },
       {
-        secret: process.env.JWT_SECRET,
+        secret: process.env.PRIVATE_KEY_REFRESH_TOKEN,
         expiresIn: process.env.EXPIRATION_TIME_REFRESH_TOKEN,
       },
     );

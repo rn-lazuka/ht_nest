@@ -25,14 +25,14 @@ export class JwtService {
     const accessToken = this.jwtServiceNest.sign(
       { userId },
       {
-        secret: process.env.JWT_SECRET,
+        secret: process.env.PRIVATE_KEY_ACCESS_TOKEN,
         expiresIn: process.env.EXPIRATION_TIME_ACCESS_TOKEN,
       },
     );
     const refreshToken = this.jwtServiceNest.sign(
       { userId, deviceId: payloadToken.deviceId },
       {
-        secret: process.env.JWT_SECRET,
+        secret: process.env.PRIVATE_KEY_REFRESH_TOKEN,
         expiresIn: process.env.EXPIRATION_TIME_REFRESH_TOKEN,
       },
     );

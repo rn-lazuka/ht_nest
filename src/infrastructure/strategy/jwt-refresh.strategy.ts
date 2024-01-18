@@ -17,13 +17,13 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: JwtRefreshStrategy.extractJWT,
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: process.env.PRIVATE_KEY_REFRESH_TOKEN,
     });
   }
 
   async validate(payload: any) {
-    // const user = this.usersQueryRepository.getUserByUserId(payload.userId);
-    // if (!user) throw new UnauthorizedException();
+    const user = this.usersQueryRepository.getUserById(payload.userId);
+    if (!user) throw new UnauthorizedException();
 
     const device = await this.devicesQueryRepository.getDeviceById(
       payload.deviceId!,
