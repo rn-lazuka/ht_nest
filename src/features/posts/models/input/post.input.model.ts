@@ -7,7 +7,10 @@ import {
   MaxLength,
   Validate,
 } from 'class-validator';
-import { IsBlogByIdExistsConstraint } from '../../../../infrastructure/decorators/posts/blog-id-exists.decorator';
+import {
+  // IsBlogByIdExists,
+  IsBlogByIdExistsConstraint,
+} from '../../../../infrastructure/decorators/posts/blog-id-exists.decorator';
 import { LikeStatus } from '../../../../infrastructure/helpers/enums/like-status';
 
 export class UpdatePostLikeStatusModel {

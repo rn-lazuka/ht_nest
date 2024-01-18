@@ -38,7 +38,9 @@ export class BlogsRepository {
   }
 
   async getBlogInstance(blogId: string): Promise<null | BlogDocument> {
+    debugger;
     const blog = await this.blogModel.findById(blogId);
+    debugger;
     return blog ? blog : null;
   }
 
