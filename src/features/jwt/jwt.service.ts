@@ -11,6 +11,7 @@ export class JwtService {
     protected jwtQueryRepository: JwtQueryRepository,
     protected devicesRepository: DevicesRepository,
   ) {}
+
   async changeTokensByRefreshToken(
     userId: string,
     cookieRefreshToken: string,
