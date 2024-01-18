@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { useContainer, ValidationError } from 'class-validator';
-import { HttpExceptionFilter } from './infrastructure/exception-filters/exception.filter';
+import { AllExceptionsFilter } from './infrastructure/exception-filters/exception.filter';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
@@ -29,7 +29,7 @@ async function bootstrap() {
       },
     }),
   );
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new AllExceptionsFilter());
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   await app.listen(5000);
 }
