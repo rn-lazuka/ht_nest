@@ -1,10 +1,11 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 export const CurrentUserId = createParamDecorator(
-  (data: unknown, context: ExecutionContext): string => {
+  (data: unknown, context: ExecutionContext): string | null => {
     const request = context.switchToHttp().getRequest();
 
-    if (!request.user?.id) throw new Error('JwtGuard must be used');
-    return request.user.id;
+    if (request.userId) return request.userId;
+    if (request.user) return request.user.id;
+    return null;
   },
 );

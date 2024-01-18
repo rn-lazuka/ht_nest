@@ -20,6 +20,7 @@ export class JwtAccessNotStrictGuard extends AuthGuard('jwt') {
     if (!accessToken) return true;
 
     const userId = await this.usersService.getUserIdByAccessToken(accessToken);
+    debugger;
     if (!userId) throw new UnauthorizedException();
 
     request.userId = userId;

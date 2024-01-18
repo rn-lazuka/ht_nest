@@ -9,6 +9,7 @@ import { UsersQueryRepository } from '../../../features/users/users.query-reposi
 @Injectable()
 export class ValidateConfirmationCodeGuard implements CanActivate {
   constructor(protected usersQueryRepository: UsersQueryRepository) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
