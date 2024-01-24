@@ -112,7 +112,6 @@ export class PostsService {
       likeStatus,
       post,
     });
-
     if (postLikeInfo?.likeStatus !== likeStatus) {
       await this.postsRepository.updatePostLikeInfo(postId, likesInfo);
     }

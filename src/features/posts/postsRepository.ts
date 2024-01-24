@@ -23,7 +23,7 @@ export class PostsRepository {
     extendedLikesInfo: { likesCount: number; dislikesCount: number },
   ) {
     const result = await this.postModel.findByIdAndUpdate(id, {
-      extendedLikesInfo,
+      likesInfo: extendedLikesInfo,
     });
     return !!result;
   }
