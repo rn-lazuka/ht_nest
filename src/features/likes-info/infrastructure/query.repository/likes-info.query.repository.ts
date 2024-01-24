@@ -39,9 +39,7 @@ export class LikesInfoQueryRepository {
     return this.postsLikesInfoModel.findOne({ postId, userId });
   }
 
-  async getNewestLikesOfPost(
-    postId: string,
-  ): Promise<Promise<NewestLikeType>[]> {
+  async getNewestLikesOfPost(postId: string): Promise<NewestLikeType[]> {
     const likeInfoArray = await this.postsLikesInfoModel
       .find({
         postId,
@@ -49,8 +47,7 @@ export class LikesInfoQueryRepository {
       })
       .sort({ addedAt: -1 })
       .limit(3);
-
-    const result = likeInfoArray.map(async (likeInfo) =>
+    const result = likeInfoArray.map((likeInfo) =>
       likeInfo.convertToViewModel(),
     );
     return result;
