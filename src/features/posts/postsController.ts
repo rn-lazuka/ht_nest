@@ -129,7 +129,6 @@ export class PostsController {
     @Body() inputPostModel: PostCreateModel,
     @Res() res: Response<PostViewType | string>,
   ) {
-    debugger;
     const result = await this.postsService.createPost(inputPostModel);
 
     result

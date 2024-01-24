@@ -30,7 +30,6 @@ export class PostsService {
   ) {}
 
   async createPost(createData: PostCreateModel): Promise<null | PostViewType> {
-    debugger;
     const blog = await this.blogsRepository.getBlogInstance(createData.blogId);
     if (!blog) {
       return null;

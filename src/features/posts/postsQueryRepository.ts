@@ -105,21 +105,24 @@ export class PostsQueryRepository {
 
     const postsWithLikes = await Promise.all(
       posts.map(async (post) => {
-        // let likeInfo: PostLikeDBType | null = null;
-        const myStatus = LikeStatus.None;
-        // if (userId) {
-        //   likeInfo = await this.likesRepository.getPostLikeInfo(
-        //     userId,
-        //     post._id.toString(),
-        //   );
-        // }
-        // if (likeInfo) {
-        //   myStatus = likeInfo.likeStatus;
-        // }
-        // const newestLikeInfo = await this.likesRepository.getNewestLikesOfPost(
-        //   post._id.toString(),
-        // );
-        return post.convertToViewModel(myStatus, []);
+        let likeInfo: PostsLikesInfoDBType | null = null;
+        let myStatus = LikeStatus.None;
+        if (userId) {
+          likeInfo =
+            await this.likesInfoQueryRepository.getPostLikesInfoByUserId(
+              post._id.toString(),
+              userId,
+            );
+        }
+        if (likeInfo) {
+          myStatus = likeInfo.likeStatus;
+        }
+
+        const newestLikeInfo =
+          await this.likesInfoQueryRepository.getNewestLikesOfPost(
+            post._id.toString(),
+          );
+        return post.convertToViewModel(myStatus, newestLikeInfo);
       }),
     );
 

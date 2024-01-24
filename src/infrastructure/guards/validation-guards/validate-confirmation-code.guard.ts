@@ -31,7 +31,6 @@ export class ValidateConfirmationCodeGuard implements CanActivate {
         { message: 'Code is already been applied', field: 'code' },
       ]); //Code is already been applied
     }
-    debugger;
     return true;
   }
 }
