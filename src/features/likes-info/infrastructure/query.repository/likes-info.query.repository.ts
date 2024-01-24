@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   CommentsLikesInfoDBType,
-  NewestLikesType,
+  NewestLikeType,
   PostsLikesInfoDBType,
 } from '../../domain/types';
 import { InjectModel } from '@nestjs/mongoose';
@@ -15,7 +15,6 @@ import {
   PostLikesInfoDocument,
   PostLikesInfoModelType,
 } from '../../domain/post-likes-info.schema';
-import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class LikesInfoQueryRepository {
@@ -40,12 +39,21 @@ export class LikesInfoQueryRepository {
     return this.postsLikesInfoModel.findOne({ postId, userId });
   }
 
-  async getNewestLikesOfPost(postId: string): Promise<NewestLikesType> {
-    return this.postsLikesInfoModel
-      .find({ postId, likeStatus: 'Like' })
+  async getNewestLikesOfPost(
+    postId: string,
+  ): Promise<Promise<NewestLikeType>[]> {
+    const likeInfoArray = await this.postsLikesInfoModel
+      .find({
+        postId,
+        likeStatus: 'Like',
+      })
       .sort({ addedAt: -1 })
-      .limit(3)
-      .lean();
+      .limit(3);
+
+    const result = likeInfoArray.map(async (likeInfo) =>
+      likeInfo.convertToViewModel(),
+    );
+    return result;
   }
 
   async getPostsLikesInfoByUserId(

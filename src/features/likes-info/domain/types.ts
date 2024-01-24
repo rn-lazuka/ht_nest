@@ -1,11 +1,13 @@
 import { ObjectId } from 'mongodb';
 import { LikeStatus } from '../../../infrastructure/helpers/enums/like-status';
 
-export type NewestLikesType = Array<{
+export type NewestLikeType = {
   addedAt: string;
   userId: string;
   login: string;
-}>;
+};
+
+export type NewestLikesType = NewestLikeType[];
 
 export class CommentsLikesInfoDBType {
   _id: ObjectId;

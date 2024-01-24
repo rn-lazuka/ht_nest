@@ -82,6 +82,7 @@ export class PostsQueryRepository {
     }
     const newestLikeInfo =
       await this.likesInfoQueryRepository.getNewestLikesOfPost(id);
+    debugger;
     return post.convertToViewModel(myStatus, newestLikeInfo);
   }
 
