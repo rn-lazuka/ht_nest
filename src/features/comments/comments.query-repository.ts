@@ -21,7 +21,7 @@ export class CommentsQueryRepository {
 
   async getCommentById(
     commentId: string,
-    userId?: string,
+    userId: string | null,
   ): Promise<CommentViewType | null> {
     const result = await this.commentModel.findById(commentId);
     if (!result) {

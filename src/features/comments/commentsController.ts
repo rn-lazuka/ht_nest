@@ -20,6 +20,7 @@ import {
   UpdateCommentInputModel,
   UpdateCommentLikeStatusInputModel,
 } from './models/input/comment.input.model';
+import { JwtAccessNotStrictGuard } from '../../infrastructure/guards/jwt-access-not-strict.guard';
 
 @Controller('/comments')
 export class CommentsController {
@@ -80,14 +81,18 @@ export class CommentsController {
       : res.sendStatus(HTTP_STATUS_CODE.NOT_FOUND_404);
   }
 
+  @UseGuards(JwtAccessNotStrictGuard)
   @Get(':id')
   async getCommentById(
     @Param('id') commentId: string,
+    @CurrentUserId() userId: string | null,
     @Res() res: Response<CommentViewType | string>,
   ) {
     try {
-      const result =
-        await this.commentsQueryRepository.getCommentById(commentId);
+      const result = await this.commentsQueryRepository.getCommentById(
+        commentId,
+        userId,
+      );
       result
         ? res.json(result)
         : res.sendStatus(HTTP_STATUS_CODE.NOT_FOUND_404);

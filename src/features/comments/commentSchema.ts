@@ -67,7 +67,10 @@ export class Comment {
   convertToViewModel(myStatus: LikeStatus): CommentViewType {
     return {
       content: this.content,
-      commentatorInfo: this.commentatorInfo,
+      commentatorInfo: {
+        userId: this.commentatorInfo.userId,
+        userLogin: this.commentatorInfo.userLogin,
+      },
       likesInfo: {
         likesCount: this.likesInfo.likesCount,
         dislikesCount: this.likesInfo.dislikesCount,
