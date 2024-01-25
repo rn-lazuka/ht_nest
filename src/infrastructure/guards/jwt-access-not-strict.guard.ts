@@ -16,7 +16,6 @@ export class JwtAccessNotStrictGuard extends AuthGuard('jwt') {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
-
     if (!accessToken) return true;
 
     const userId = await this.usersService.getUserIdByAccessToken(accessToken);

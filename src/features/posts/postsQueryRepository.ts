@@ -88,7 +88,7 @@ export class PostsQueryRepository {
   async getAllPostsForBlog(
     blogId: string,
     query: PostQueryModel,
-    userId?: string,
+    userId: string | null,
   ) {
     const blog = await this.blogsRepository.getBlogById(blogId);
     if (!blog) {

@@ -33,7 +33,7 @@ export class Comment {
   @Prop({ required: true })
   content: string;
   @Prop({ required: true })
-  createdAt: string;
+  createdAt: Date;
   @Prop({ required: true, type: CommentatorInfoSchema })
   commentatorInfo: CommentatorInfo;
   @Prop({ required: true })
@@ -51,6 +51,7 @@ export class Comment {
     return new CommentModel({
       _id: new ObjectId(),
       content,
+      createdAt: new Date().toISOString(),
       commentatorInfo: {
         userId,
         userLogin,
@@ -73,7 +74,7 @@ export class Comment {
         myStatus,
       },
       id: this._id.toString(),
-      createdAt: this.createdAt,
+      createdAt: this.createdAt.toISOString(),
     };
   }
 }

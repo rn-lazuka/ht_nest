@@ -35,6 +35,8 @@ import {
 import { BlogsService } from './application/blogsService';
 import { PostsQueryRepository } from '../posts/postsQueryRepository';
 import { BasicAuthGuard } from '../../infrastructure/guards/basic-auth.guard';
+import { JwtAccessNotStrictGuard } from '../../infrastructure/guards/jwt-access-not-strict.guard';
+import { CurrentUserId } from '../../infrastructure/decorators/auth/current-user-id.param.decorator';
 
 @Controller('/blogs')
 export class BlogsController {
@@ -130,15 +132,18 @@ export class BlogsController {
     }
   }
 
+  @UseGuards(JwtAccessNotStrictGuard)
   @Get(':blogId/posts')
   async getAllPostsOfBlog(
     @Param('blogId') blogId: string,
+    @CurrentUserId() userId: string | null,
     @Query() query: BlogQueryModel,
     @Res() res: Response<PostsPaginationType>,
   ) {
     const result = await this.postsQueryRepository.getAllPostsForBlog(
       blogId,
       query,
+      userId,
     );
     result
       ? res.status(HTTP_STATUS_CODE.OK_200).send(result)
