@@ -11,12 +11,14 @@ import {
 import { LikesInfoQueryRepository } from '../likes-info/infrastructure/query.repository/likes-info.query.repository';
 import { PostQueryModel } from '../posts/models/input/post.input.model';
 import { CommentsLikesInfoDBType } from '../likes-info/domain/types';
+import { PostsQueryRepository } from '../posts/postsQueryRepository';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(
     @InjectModel(Comment.name) private commentModel: CommentModelType,
     private likesInfoQueryRepository: LikesInfoQueryRepository,
+    private postsQueryRepository: PostsQueryRepository,
   ) {}
 
   async getCommentById(
@@ -46,7 +48,11 @@ export class CommentsQueryRepository {
     postId: string,
     query: CommentQueryModel | PostQueryModel,
     userId: string | null,
-  ): Promise<CommentsPaginationType> {
+  ): Promise<CommentsPaginationType | null> {
+    const post = await this.postsQueryRepository.getPostById(postId, userId);
+    if (!post) {
+      return null;
+    }
     const paramsOfElems = getQueryParams(query);
     const commentsCount = await this.commentModel.countDocuments({ postId });
     const comments = await this.commentModel
