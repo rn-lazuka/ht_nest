@@ -31,7 +31,7 @@ export class DevicesService {
     if (!payloadToken) {
       throw new UnauthorizedException();
     }
-    const device = await this.deviceModel.createInstance(
+    const device = this.deviceModel.createInstance(
       ip,
       title,
       payloadToken,

@@ -16,6 +16,7 @@ import { RegisterUserModel } from '../../users/models/input/user.input.model';
 import { CryptoAdapter } from '../../../infrastructure/adapters/crypto.adapter';
 import { EmailManager } from '../../../infrastructure/managers/email-manager';
 import { JwtService } from '@nestjs/jwt';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class AuthService {
@@ -55,7 +56,7 @@ export class AuthService {
       },
     );
     const refreshToken = this.jwtService.sign(
-      { userId, deviceId: uuidv4() },
+      { userId, deviceId: new ObjectId().toString() },
       {
         secret: process.env.PRIVATE_KEY_REFRESH_TOKEN,
         expiresIn: process.env.EXPIRATION_TIME_REFRESH_TOKEN,

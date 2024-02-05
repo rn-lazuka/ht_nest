@@ -19,7 +19,7 @@ export class DevicesRepository {
   }
 
   async getDeviceInstance(deviceId: string): Promise<null | DeviceDocument> {
-    const device = await this.deviceModel.findById(deviceId);
+    const device = await this.deviceModel.findOne({ deviceId });
     return device;
   }
 
