@@ -1,21 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import { JwtQueryRepository } from './jwt.query.repository';
-import { AccessRefreshTokens } from './jwt.types.service';
-import { JwtService as NestJwtService } from '@nestjs/jwt';
-import { DevicesRepository } from '../devices/infrastructure/repository/devices.repository';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { JwtService as NestJwtService } from '@nestjs/jwt/dist/jwt.service';
+import { AccessRefreshTokens } from '../jwt.types.service';
+import { JwtQueryRepository } from '../jwt.query.repository';
+import { DevicesRepository } from '../../devices/infrastructure/repository/devices.repository';
 
-@Injectable()
-export class JwtService {
+export class ChangeTokenByRefreshTokenCommand {
+  constructor(
+    public userId: string,
+    public cookieRefreshToken: string,
+  ) {}
+}
+
+@CommandHandler(ChangeTokenByRefreshTokenCommand)
+export class ChangeTokenByRefreshTokenUseCase
+  implements ICommandHandler<ChangeTokenByRefreshTokenCommand>
+{
   constructor(
     protected jwtServiceNest: NestJwtService,
     protected jwtQueryRepository: JwtQueryRepository,
     protected devicesRepository: DevicesRepository,
   ) {}
 
-  async changeTokensByRefreshToken(
-    userId: string,
-    cookieRefreshToken: string,
+  async execute(
+    command: ChangeTokenByRefreshTokenCommand,
   ): Promise<AccessRefreshTokens> {
+    const { userId, cookieRefreshToken } = command;
     const payloadToken =
       this.jwtQueryRepository.getPayloadToken(cookieRefreshToken);
     if (!payloadToken) {

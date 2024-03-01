@@ -17,16 +17,19 @@ import {
   UserViewType,
   ViewAllUsersModels,
 } from './models/output/user.output.model';
-import { UsersService } from './application/usersService';
 import { UsersQueryRepository } from './users.query-repository';
 import { CreateUserInputModel } from './models/input/create-user.input.model';
 import { BasicAuthGuard } from '../../infrastructure/guards/basic-auth.guard';
+import { UsersRepository } from './usersRepository';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from './use-cases/create-user.use-case';
 
 @Controller('/users')
 export class UsersController {
   constructor(
     protected usersQueryRepository: UsersQueryRepository,
-    protected usersService: UsersService,
+    protected usersRepository: UsersRepository,
+    protected commandBus: CommandBus,
   ) {}
 
   @UseGuards(BasicAuthGuard)
@@ -52,7 +55,9 @@ export class UsersController {
     @Res() res: Response<UserViewType | string>,
   ) {
     try {
-      const result = await this.usersService.createUser(inputUserModel);
+      const result = await this.commandBus.execute(
+        new CreateUserCommand(inputUserModel),
+      );
       res.status(HTTP_STATUS_CODE.CREATED_201).send(result);
     } catch (err) {
       throw new InternalServerErrorException(
@@ -65,7 +70,7 @@ export class UsersController {
   @Delete(':id')
   async deleteUser(@Param('id') userId: string, @Res() res: Response<void>) {
     try {
-      const result = await this.usersService.deleteUser(userId);
+      const result = await this.usersRepository.deleteUser(userId);
 
       result
         ? res.sendStatus(HTTP_STATUS_CODE.NO_CONTENT_204)

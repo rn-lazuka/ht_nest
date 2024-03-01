@@ -8,15 +8,15 @@ import {
   PostsPaginationType,
   PostViewType,
 } from './models/output/post.output.model';
-import { BlogsRepository } from '../blogs/blogsRepository';
 import { LikesInfoQueryRepository } from '../likes-info/infrastructure/query.repository/likes-info.query.repository';
 import { PostsLikesInfoDBType } from '../likes-info/domain/types';
+import { BlogsQueryRepository } from '../blogs/blogs-query-repository';
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(
     @InjectModel(Post.name) private postModel: PostModelType,
-    protected blogsRepository: BlogsRepository,
+    protected blogsQueryRepository: BlogsQueryRepository,
     protected likesInfoQueryRepository: LikesInfoQueryRepository,
   ) {}
 
@@ -90,7 +90,7 @@ export class PostsQueryRepository {
     query: PostQueryModel,
     userId: string | null,
   ) {
-    const blog = await this.blogsRepository.getBlogById(blogId);
+    const blog = await this.blogsQueryRepository.getBlogById(blogId);
     if (!blog) {
       return null;
     }

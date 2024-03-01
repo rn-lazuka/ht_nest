@@ -31,7 +31,7 @@ export class DevicesRepository {
   }
 
   async deleteDeviceById(deviceId: string): Promise<boolean> {
-    const result = await this.deviceModel.findByIdAndDelete(deviceId);
+    const result = await this.deviceModel.findOneAndDelete({ deviceId });
     return !!result;
   }
 }

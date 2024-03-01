@@ -5,11 +5,12 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ExtractJwt } from 'passport-jwt';
-import { UsersService } from '../../features/users/application/usersService';
+import { CommandBus } from '@nestjs/cqrs';
+import { GetUserIdByAccessTokenCommand } from '../../features/jwt/use-cases/getUserIdByAccessToken.use-case';
 
 @Injectable()
 export class JwtAccessNotStrictGuard extends AuthGuard('jwt') {
-  constructor(protected usersService: UsersService) {
+  constructor(protected commandBus: CommandBus) {
     super();
   }
 
@@ -18,7 +19,9 @@ export class JwtAccessNotStrictGuard extends AuthGuard('jwt') {
     const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
     if (!accessToken) return true;
 
-    const userId = await this.usersService.getUserIdByAccessToken(accessToken);
+    const userId = await this.commandBus.execute(
+      new GetUserIdByAccessTokenCommand(accessToken),
+    );
     if (!userId) throw new UnauthorizedException();
 
     request.userId = userId;

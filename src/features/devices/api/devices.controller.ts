@@ -1,6 +1,5 @@
 import { Controller, Delete, Get, Param, Res, UseGuards } from '@nestjs/common';
 import { DevicesQueryRepository } from '../infrastructure/query.repository/devices.query.repository';
-import { DevicesService } from '../application/devices.service';
 import { DeviceOutputModel } from './models/output/device.output.model';
 import { HTTP_STATUS_CODE } from '../../../infrastructure/helpers/enums/http-status';
 import { SkipThrottle } from '@nestjs/throttler';
@@ -8,13 +7,16 @@ import { JwtRefreshGuard } from '../../../infrastructure/guards/jwt-refresh.guar
 import { RefreshToken } from '../../../infrastructure/decorators/auth/refresh-token-param.decorator';
 import { Response } from 'express';
 import { CurrentUserId } from '../../../infrastructure/decorators/auth/current-user-id.param.decorator';
+import { CommandBus } from '@nestjs/cqrs';
+import { DeleteDevicesExcludeCurrentCommand } from '../use-cases/delete-devices-exclude-current.use-case';
+import { DeleteDeviceByIdCommand } from '../use-cases/delete-device-by-id.use-case';
 
 @SkipThrottle()
 @Controller('/security/devices')
 export class DevicesController {
   constructor(
+    protected commandBus: CommandBus,
     protected devicesQueryRepository: DevicesQueryRepository,
-    protected devicesService: DevicesService,
   ) {}
 
   @UseGuards(JwtRefreshGuard)
@@ -35,7 +37,9 @@ export class DevicesController {
     @RefreshToken() refreshToken: string,
     @Res() res: Response<string>,
   ) {
-    await this.devicesService.deleteDevicesExcludeCurrent(refreshToken);
+    await this.commandBus.execute(
+      new DeleteDevicesExcludeCurrentCommand(refreshToken),
+    );
     res.sendStatus(HTTP_STATUS_CODE.NO_CONTENT_204);
   }
 
@@ -46,7 +50,9 @@ export class DevicesController {
     @Param('id') deviceId: string,
     @Res() res: Response<string>,
   ) {
-    const result = await this.devicesService.deleteDeviceById(deviceId, userId);
+    const result = await this.commandBus.execute(
+      new DeleteDeviceByIdCommand(deviceId, userId),
+    );
     res.status(result.status).send(result.message);
   }
 }

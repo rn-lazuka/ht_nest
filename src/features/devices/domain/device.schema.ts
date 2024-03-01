@@ -2,6 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 
 import { HydratedDocument, Model } from 'mongoose';
+import { LikeStatus } from '../../../infrastructure/helpers/enums/like-status';
+import {
+  NewLike,
+  PostViewType,
+} from '../../posts/models/output/post.output.model';
+import { DeviceViewType } from '../api/models/output/device.output.model';
+import { Post } from '../../posts/postSchema';
 
 //node cron
 
@@ -43,12 +50,24 @@ export class Device {
       expirationDate: payloadToken.exp - payloadToken.iat,
     });
   }
+
+  convertToViewModel(): DeviceViewType {
+    return {
+      deviceId: this.deviceId,
+      title: this.title,
+      ip: this.ip,
+      lastActiveDate: this.lastActiveDate,
+    };
+  }
 }
 
 export const DeviceSchema = SchemaFactory.createForClass(Device);
 
 DeviceSchema.statics = {
   createInstance: Device.createInstance,
+};
+DeviceSchema.methods = {
+  convertToViewModel: Post.prototype.convertToViewModel,
 };
 
 export type DeviceModelStaticMethodsType = {

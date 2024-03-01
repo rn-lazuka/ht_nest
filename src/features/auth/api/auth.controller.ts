@@ -8,7 +8,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from '../application/auth.service';
 import { AuthViewModel, TokenViewModel } from './models/output/authViewModel';
 import { HTTP_STATUS_CODE } from '../../../infrastructure/helpers/enums/http-status';
 import {
@@ -26,19 +25,27 @@ import {
 import { SkipThrottle } from '@nestjs/throttler';
 import { JwtRefreshGuard } from '../../../infrastructure/guards/jwt-refresh.guard';
 import { RefreshToken } from '../../../infrastructure/decorators/auth/refresh-token-param.decorator';
-import { JwtService } from '../../jwt/jwt.service';
-import { DevicesService } from '../../devices/application/devices.service';
 import { ValidateEmailResendingGuard } from '../../../infrastructure/guards/validation-guards/validate-email-resending.guard';
 import { ValidateEmailRegistrationGuard } from '../../../infrastructure/guards/validation-guards/validate-email-registration.guard';
 import { ValidateConfirmationCodeGuard } from '../../../infrastructure/guards/validation-guards/validate-confirmation-code.guard';
 import { TitleOfDevice } from '../../../infrastructure/decorators/auth/title-of-device.param.decorator';
+import { CommandBus } from '@nestjs/cqrs';
+import { ConfirmEmailCommand } from '../use-cases/confirm-email.use-case';
+import { LoginUserCommand } from '../use-cases/login-user.use-case';
+import { UsersQueryRepository } from '../../users/users.query-repository';
+import { RegisterUserCommand } from '../use-cases/register-user.use-case';
+import { ResendConfirmationEmailMsgCommand } from '../use-cases/resend-confirmation-email-message.use-case';
+import { SendEmailPassRecoveryCommand } from '../use-cases/send-email-pass-recovery.use-case';
+import { SaveNewPasswordCommand } from '../use-cases/save-new-password.use-case';
+import { DeleteDeviceByRefreshTokenCommand } from '../../devices/use-cases/delete-device-by-refresh-token.use-case';
+import { CreateNewDeviceCommand } from '../../devices/use-cases/create-new-device.use-case';
+import { ChangeTokenByRefreshTokenCommand } from '../../jwt/use-cases/change-token-by-refresh-token.use-case';
 
 @Controller('/auth')
 export class AuthController {
   constructor(
-    protected jwtService: JwtService,
-    protected devicesService: DevicesService,
-    protected authService: AuthService,
+    protected commandBus: CommandBus,
+    protected usersQueryRepository: UsersQueryRepository,
   ) {}
 
   @SkipThrottle()
@@ -48,10 +55,11 @@ export class AuthController {
     @CurrentUserId() userId: string,
     @Res() res: Response<AuthViewModel>,
   ) {
-    const result = await this.authService.getUserInformation(userId);
-
+    const result = await this.usersQueryRepository.getUserById(userId);
     if (result) {
-      res.status(HTTP_STATUS_CODE.OK_200).send(result);
+      res
+        .status(HTTP_STATUS_CODE.OK_200)
+        .send({ userId: result.id, email: result.email, login: result.login });
     } else {
       res.sendStatus(HTTP_STATUS_CODE.NOT_FOUND_404);
     }
@@ -64,7 +72,9 @@ export class AuthController {
     @RefreshToken() refreshToken: string,
     @Res() res: Response<void>,
   ) {
-    await this.devicesService.deleteDeviceByRefreshToken(refreshToken);
+    await this.commandBus.execute(
+      new DeleteDeviceByRefreshTokenCommand(refreshToken),
+    );
     res.sendStatus(HTTP_STATUS_CODE.NO_CONTENT_204);
   }
 
@@ -74,7 +84,9 @@ export class AuthController {
     @Body() inputEmail: EmailResendingInputModel,
     @Res() res: Response<string>,
   ) {
-    await this.authService.resendConfirmationEmailMessage(inputEmail.email);
+    await this.commandBus.execute(
+      new ResendConfirmationEmailMsgCommand(inputEmail.email),
+    );
     res
       .status(HTTP_STATUS_CODE.NO_CONTENT_204)
       .send(
@@ -88,10 +100,12 @@ export class AuthController {
     @Body() inputRegisterModel: RegistrationInputModel,
     @Res() res: Response<string>,
   ) {
-    await this.authService.registerUser(
-      inputRegisterModel.email,
-      inputRegisterModel.login,
-      inputRegisterModel.password,
+    await this.commandBus.execute(
+      new RegisterUserCommand(
+        inputRegisterModel.email,
+        inputRegisterModel.login,
+        inputRegisterModel.password,
+      ),
     );
 
     res
@@ -107,7 +121,9 @@ export class AuthController {
     @Body() inputConfirmationCode: ConfirmationCodeModel,
     @Res() res: Response<string>,
   ) {
-    await this.authService.confirmEmail(inputConfirmationCode.code);
+    await this.commandBus.execute(
+      new ConfirmEmailCommand(inputConfirmationCode.code),
+    );
     res
       .status(HTTP_STATUS_CODE.NO_CONTENT_204)
       .send('Email was verified. Account was activated');
@@ -121,9 +137,8 @@ export class AuthController {
     @RefreshToken() refreshToken: string,
     @Res() res: Response<TokenViewModel | string>,
   ) {
-    const tokens = await this.jwtService.changeTokensByRefreshToken(
-      userId,
-      refreshToken,
+    const tokens = await this.commandBus.execute(
+      new ChangeTokenByRefreshTokenCommand(userId, refreshToken),
     );
 
     res
@@ -143,14 +158,16 @@ export class AuthController {
     @Ip() ip: string,
     @TitleOfDevice() title: string,
   ) {
-    const result = await this.authService.loginUser(userId);
+    const result = await this.commandBus.execute(new LoginUserCommand(userId));
 
     if (result) {
-      await this.devicesService.createNewDevice(
-        ip || 'unknown',
-        title,
-        result.userId,
-        result.refreshToken,
+      await this.commandBus.execute(
+        new CreateNewDeviceCommand(
+          ip || 'unknown',
+          title,
+          result.userId,
+          result.refreshToken,
+        ),
       );
 
       res.cookie('refreshToken', result.refreshToken, {
@@ -170,9 +187,8 @@ export class AuthController {
     @Body() inputInfo: NewPasswordModel,
     @Res() res: Response<string>,
   ) {
-    await this.authService.saveNewPassword(
-      inputInfo.newPassword,
-      inputInfo.recoveryCode,
+    await this.commandBus.execute(
+      new SaveNewPasswordCommand(inputInfo.newPassword, inputInfo.recoveryCode),
     );
 
     res.status(HTTP_STATUS_CODE.NO_CONTENT_204).send('New password is saved');
@@ -183,7 +199,9 @@ export class AuthController {
     @Body() inputEmail: PasswordRecoveryModel,
     @Res() res: Response<string>,
   ) {
-    await this.authService.sendEmailPasswordRecovery(inputEmail.email);
+    await this.commandBus.execute(
+      new SendEmailPassRecoveryCommand(inputEmail.email),
+    );
     res
       .status(HTTP_STATUS_CODE.NO_CONTENT_204)
       .send(

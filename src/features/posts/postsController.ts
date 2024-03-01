@@ -22,7 +22,6 @@ import {
   PostQueryModel,
   UpdatePostLikeStatusModel,
 } from './models/input/post.input.model';
-import { PostsService } from './application/postsService';
 import {
   CommentsPaginationType,
   CommentViewType,
@@ -37,15 +36,20 @@ import {
   CreateCommentByPostIdModel,
 } from '../comments/models/input/comment.input.model';
 import { JwtAccessGuard } from '../../infrastructure/guards/jwt-access.guard';
-import { CommentsService } from '../comments/application/comments.service';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateCommentByPostIdCommand } from '../comments/use-cases/create-comment-by-post-id.use-case';
+import { PostsRepository } from './postsRepository';
+import { CreatePostCommand } from './use-cases/create-post.use-case';
+import { UpdatePostCommand } from './use-cases/update-post.use-case';
+import { UpdatePostLikeStatusCommand } from './use-cases/update-post-like-status.use-case';
 
 @Controller('/posts')
 export class PostsController {
   constructor(
     protected postsQueryRepository: PostsQueryRepository,
+    protected postsRepository: PostsRepository,
     protected commentsRepository: CommentsQueryRepository,
-    protected commentsService: CommentsService,
-    protected postsService: PostsService,
+    protected commandBus: CommandBus,
   ) {}
 
   @UseGuards(JwtAccessGuard)
@@ -56,10 +60,12 @@ export class PostsController {
     @Body() inputLikeStatusModel: UpdatePostLikeStatusModel,
     @Res() res: Response<string>,
   ) {
-    const result = await this.postsService.updateLikeStatus(
-      postId,
-      userId,
-      inputLikeStatusModel.likeStatus,
+    const result = await this.commandBus.execute(
+      new UpdatePostLikeStatusCommand(
+        postId,
+        userId,
+        inputLikeStatusModel.likeStatus,
+      ),
     );
 
     result
@@ -95,10 +101,12 @@ export class PostsController {
     @Body() inputCommentModel: CreateCommentByPostIdModel,
     @Res() res: Response<CommentViewType>,
   ) {
-    const result = await this.commentsService.createCommentByPostId(
-      inputCommentModel.content,
-      userId,
-      postId,
+    const result = await this.commandBus.execute(
+      new CreateCommentByPostIdCommand(
+        inputCommentModel.content,
+        userId,
+        postId,
+      ),
     );
     result
       ? res.status(HTTP_STATUS_CODE.CREATED_201).send(result)
@@ -128,7 +136,9 @@ export class PostsController {
     @Body() inputPostModel: PostCreateModel,
     @Res() res: Response<PostViewType | string>,
   ) {
-    const result = await this.postsService.createPost(inputPostModel);
+    const result = await this.commandBus.execute(
+      new CreatePostCommand(inputPostModel),
+    );
 
     result
       ? res.status(HTTP_STATUS_CODE.CREATED_201).send(result)
@@ -155,7 +165,9 @@ export class PostsController {
     @Body() inputPostModel: PostCreateModel,
     @Res() res: Response<void>,
   ) {
-    const result = await this.postsService.updatePost(postId, inputPostModel);
+    const result = await this.commandBus.execute(
+      new UpdatePostCommand(postId, inputPostModel),
+    );
 
     result
       ? res.sendStatus(HTTP_STATUS_CODE.NO_CONTENT_204)
@@ -165,7 +177,7 @@ export class PostsController {
   @UseGuards(BasicAuthGuard)
   @Delete(':id')
   async deletePost(@Param('id') postId: string, @Res() res: Response<void>) {
-    const result = await this.postsService.deletePost(postId);
+    const result = await this.postsRepository.deletePost(postId);
 
     result
       ? res.sendStatus(HTTP_STATUS_CODE.NO_CONTENT_204)

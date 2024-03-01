@@ -12,7 +12,7 @@ export class DevicesQueryRepository {
   ) {}
 
   async getAllDevicesByUserId(userId: string): Promise<DeviceViewType[]> {
-    return this.deviceModel.find({ userId }).lean();
+    return this.deviceModel.find({ userId });
   }
 
   async getDeviceById(deviceId: string): Promise<DeviceDBType | null> {
