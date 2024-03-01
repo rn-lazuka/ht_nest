@@ -90,6 +90,7 @@ import { UpdatePostUseCase } from './features/posts/use-cases/update-post.use-ca
 import { UpdatePostLikeStatusUseCase } from './features/posts/use-cases/update-post-like-status.use-case';
 import { CreateUserUseCase } from './features/users/use-cases/create-user.use-case';
 import { GetUserIdByAccessTokenUseCase } from './features/jwt/use-cases/getUserIdByAccessToken.use-case';
+import { CqrsModule } from '@nestjs/cqrs';
 
 const queryRepositories = [
   CommentsQueryRepository,
@@ -150,6 +151,7 @@ const handlers = [
         limit: 5,
       },
     ]),
+    CqrsModule,
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGO_URL!),
     JwtModule.register({}),
