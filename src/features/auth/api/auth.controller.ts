@@ -49,6 +49,38 @@ export class AuthController {
     protected usersQueryRepository: UsersQueryRepository,
   ) {}
 
+  @UseGuards(LocalAuthGuard)
+  @Post('login')
+  async loginUser(
+    @CurrentUserId() userId: string,
+    @Res() res: Response<TokenViewModel>,
+    @Ip() ip: string,
+    @TitleOfDevice() title: string,
+  ) {
+    const result = await this.commandBus.execute(new LoginUserCommand(userId));
+
+    if (result) {
+      await this.commandBus.execute(
+        new CreateNewDeviceCommand(
+          ip || 'unknown',
+          title,
+          result.userId,
+          result.refreshToken,
+        ),
+      );
+
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: true,
+      });
+      res
+        .status(HTTP_STATUS_CODE.OK_200)
+        .send({ accessToken: result.accessToken });
+    } else {
+      res.sendStatus(HTTP_STATUS_CODE.UNAUTHORIZED_401);
+    }
+  }
+
   @SkipThrottle()
   @UseGuards(JwtAccessGuard)
   @Get('me')
@@ -151,38 +183,6 @@ export class AuthController {
       })
       .status(HTTP_STATUS_CODE.OK_200)
       .send({ accessToken: tokens.accessToken });
-  }
-
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  async loginUser(
-    @CurrentUserId() userId: string,
-    @Res() res: Response<TokenViewModel>,
-    @Ip() ip: string,
-    @TitleOfDevice() title: string,
-  ) {
-    const result = await this.commandBus.execute(new LoginUserCommand(userId));
-
-    if (result) {
-      await this.commandBus.execute(
-        new CreateNewDeviceCommand(
-          ip || 'unknown',
-          title,
-          result.userId,
-          result.refreshToken,
-        ),
-      );
-
-      res.cookie('refreshToken', result.refreshToken, {
-        httpOnly: true,
-        secure: true,
-      });
-      res
-        .status(HTTP_STATUS_CODE.OK_200)
-        .send({ accessToken: result.accessToken });
-    } else {
-      res.sendStatus(HTTP_STATUS_CODE.UNAUTHORIZED_401);
-    }
   }
 
   @SkipThrottle()

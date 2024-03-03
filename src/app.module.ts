@@ -155,7 +155,7 @@ const handlers = [
   imports: [
     ThrottlerModule.forRoot([
       {
-        ttl: 10,
+        ttl: 10000,
         limit: 5,
       },
     ]),
