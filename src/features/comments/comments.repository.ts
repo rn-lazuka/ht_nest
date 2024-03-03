@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CommentModelType, Comment, CommentDocument } from './commentSchema';
@@ -20,11 +19,6 @@ export class CommentsRepository {
     return;
   }
 
-  async createComments(comments): Promise<void> {
-    await this.commentModel.insertMany(comments);
-    return;
-  }
-
   async updateCommentLikeInfo(
     id: string,
     likesInfo: { likesCount: number; dislikesCount: number },
@@ -36,12 +30,5 @@ export class CommentsRepository {
   async deleteComment(id: string): Promise<boolean> {
     const result = await this.commentModel.findByIdAndDelete(id);
     return !!result;
-  }
-
-  async deleteCommentsByUserId(userId: string): Promise<boolean> {
-    const result = await this.commentModel.deleteMany({
-      'commentatorInfo.userId': userId,
-    });
-    return result.deletedCount > 0;
   }
 }

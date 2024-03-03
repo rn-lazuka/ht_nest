@@ -12,7 +12,8 @@ export class DevicesQueryRepository {
   ) {}
 
   async getAllDevicesByUserId(userId: string): Promise<DeviceViewType[]> {
-    return this.deviceModel.find({ userId });
+    const devices = await this.deviceModel.find({ userId });
+    return devices.map((device) => device.convertToViewModel());
   }
 
   async getDeviceById(deviceId: string): Promise<DeviceDBType | null> {

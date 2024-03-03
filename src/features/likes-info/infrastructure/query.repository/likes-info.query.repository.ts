@@ -7,12 +7,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import {
   CommentLikesInfo,
-  CommentLikesInfoDocument,
   CommentLikesInfoModelType,
 } from '../../domain/comment-likes-info.schema';
 import {
   PostLikesInfo,
-  PostLikesInfoDocument,
   PostLikesInfoModelType,
 } from '../../domain/post-likes-info.schema';
 
@@ -51,23 +49,5 @@ export class LikesInfoQueryRepository {
       likeInfo.convertToViewModel(),
     );
     return result;
-  }
-
-  async getPostsLikesInfoByUserId(
-    userId: string,
-  ): Promise<PostLikesInfoDocument[] | null> {
-    const postsLikesInfo = await this.postsLikesInfoModel
-      .find({ userId })
-      .lean();
-    return postsLikesInfo.length ? postsLikesInfo : null;
-  }
-
-  async getCommentsLikesInfoByUserId(
-    userId: string,
-  ): Promise<CommentLikesInfoDocument[] | null> {
-    const commentLikesInfo = await this.commentsLikesInfoModel
-      .find({ userId })
-      .lean();
-    return commentLikesInfo.length ? commentLikesInfo : null;
   }
 }

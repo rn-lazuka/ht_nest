@@ -26,17 +26,19 @@ export class DeleteDeviceByIdUseCase
   async execute(command: DeleteDeviceByIdCommand): Promise<ResponseObject> {
     const { deviceId, userId } = command;
     const device = await this.devicesQueryRepository.getDeviceById(deviceId);
-
-    if (!device)
+    if (!device) {
       return createResponseObject(
         HTTP_STATUS_CODE.NOT_FOUND_404,
         'The device is not found',
       );
-    if (device.userId !== userId)
+    }
+
+    if (device.userId !== userId) {
       return createResponseObject(
         HTTP_STATUS_CODE.FORBIDDEN_403,
         "You can't delete not your own device",
       );
+    }
 
     const result = await this.deviceRepository.deleteDeviceById(deviceId);
     if (!result) {

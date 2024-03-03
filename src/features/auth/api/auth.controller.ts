@@ -72,10 +72,12 @@ export class AuthController {
     @RefreshToken() refreshToken: string,
     @Res() res: Response<void>,
   ) {
-    await this.commandBus.execute(
+    const result = await this.commandBus.execute(
       new DeleteDeviceByRefreshTokenCommand(refreshToken),
     );
-    res.sendStatus(HTTP_STATUS_CODE.NO_CONTENT_204);
+    result
+      ? res.sendStatus(HTTP_STATUS_CODE.NO_CONTENT_204)
+      : res.sendStatus(HTTP_STATUS_CODE.UNAUTHORIZED_401);
   }
 
   @UseGuards(ValidateEmailResendingGuard)

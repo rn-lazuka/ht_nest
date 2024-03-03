@@ -1,8 +1,11 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService as NestJwtService } from '@nestjs/jwt/dist/jwt.service';
 import { AccessRefreshTokens } from '../jwt.types.service';
 import { JwtQueryRepository } from '../jwt.query.repository';
 import { DevicesRepository } from '../../devices/infrastructure/repository/devices.repository';
+import { CheckIsTokenValidCommand } from './check-is-token-valid.use-case';
+import { RefreshTokenModelType } from '../../auth/domain/refreshToken.schema';
+import { AuthRepository } from '../../auth/infrastructure/repository/auth.repository';
 
 export class ChangeTokenByRefreshTokenCommand {
   constructor(
@@ -19,17 +22,28 @@ export class ChangeTokenByRefreshTokenUseCase
     protected jwtServiceNest: NestJwtService,
     protected jwtQueryRepository: JwtQueryRepository,
     protected devicesRepository: DevicesRepository,
+    protected commandBus: CommandBus,
+    private refreshTokenModel: RefreshTokenModelType,
+    private authRepository: AuthRepository,
   ) {}
 
   async execute(
     command: ChangeTokenByRefreshTokenCommand,
   ): Promise<AccessRefreshTokens> {
     const { userId, cookieRefreshToken } = command;
-    const payloadToken =
-      this.jwtQueryRepository.getPayloadToken(cookieRefreshToken);
-    if (!payloadToken) {
+    const isTokenValid = await this.commandBus.execute(
+      new CheckIsTokenValidCommand(cookieRefreshToken),
+    );
+
+    if (!isTokenValid) {
       throw new Error('Refresh token is invalid.');
     }
+
+    const deactivatedRefreshToken = this.refreshTokenModel.createInstance(
+      { refreshToken: cookieRefreshToken },
+      this.refreshTokenModel,
+    );
+    await this.authRepository.save(deactivatedRefreshToken);
 
     const accessToken = this.jwtServiceNest.sign(
       { userId },
@@ -39,7 +53,7 @@ export class ChangeTokenByRefreshTokenUseCase
       },
     );
     const refreshToken = this.jwtServiceNest.sign(
-      { userId, deviceId: payloadToken.deviceId },
+      { userId, deviceId: isTokenValid.deviceId },
       {
         secret: process.env.PRIVATE_KEY_REFRESH_TOKEN,
         expiresIn: process.env.EXPIRATION_TIME_REFRESH_TOKEN,
@@ -53,7 +67,7 @@ export class ChangeTokenByRefreshTokenUseCase
     }
 
     const device = await this.devicesRepository.getDeviceInstance(
-      payloadToken.deviceId,
+      isTokenValid.deviceId,
     );
     if (!device) throw new Error('DeviceId in refresh token is invalid.');
 

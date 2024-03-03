@@ -91,6 +91,7 @@ import { UpdatePostLikeStatusUseCase } from './features/posts/use-cases/update-p
 import { CreateUserUseCase } from './features/users/use-cases/create-user.use-case';
 import { GetUserIdByAccessTokenUseCase } from './features/jwt/use-cases/getUserIdByAccessToken.use-case';
 import { CqrsModule } from '@nestjs/cqrs';
+import { CheckIsTokenValidUseCase } from './features/jwt/use-cases/check-is-token-valid.use-case';
 
 const queryRepositories = [
   CommentsQueryRepository,
@@ -141,6 +142,7 @@ const handlers = [
   UpdatePostLikeStatusUseCase,
   CreateUserUseCase,
   GetUserIdByAccessTokenUseCase,
+  CheckIsTokenValidUseCase,
 ];
 
 @Module({
