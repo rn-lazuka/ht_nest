@@ -1,8 +1,12 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DevicesRepository } from '../infrastructure/repository/devices.repository';
 import { CheckIsTokenValidCommand } from '../../jwt/use-cases/check-is-token-valid.use-case';
-import { RefreshTokenModelType } from '../../auth/domain/refreshToken.schema';
+import {
+  RefreshToken,
+  RefreshTokenModelType,
+} from '../../auth/domain/refreshToken.schema';
 import { AuthRepository } from '../../auth/infrastructure/repository/auth.repository';
+import { InjectModel } from '@nestjs/mongoose';
 
 export class DeleteDeviceByRefreshTokenCommand {
   constructor(public refreshToken: string) {}
@@ -15,8 +19,9 @@ export class DeleteDeviceByRefreshTokenUseCase
   constructor(
     protected deviceRepository: DevicesRepository,
     protected commandBus: CommandBus,
+    @InjectModel(RefreshToken.name)
     private refreshTokenModel: RefreshTokenModelType,
-    private authRepository: AuthRepository,
+    protected authRepository: AuthRepository,
   ) {}
 
   async execute(command: DeleteDeviceByRefreshTokenCommand): Promise<boolean> {

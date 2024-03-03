@@ -92,6 +92,11 @@ import { CreateUserUseCase } from './features/users/use-cases/create-user.use-ca
 import { GetUserIdByAccessTokenUseCase } from './features/jwt/use-cases/getUserIdByAccessToken.use-case';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CheckIsTokenValidUseCase } from './features/jwt/use-cases/check-is-token-valid.use-case';
+import { AuthRepository } from './features/auth/infrastructure/repository/auth.repository';
+import {
+  RefreshToken,
+  RefreshTokenSchema,
+} from './features/auth/domain/refreshToken.schema';
 
 const queryRepositories = [
   CommentsQueryRepository,
@@ -109,6 +114,7 @@ const repositories = [
   LikesInfoRepository,
   PostsRepository,
   UsersRepository,
+  AuthRepository,
   TestsRepository,
 ];
 
@@ -158,15 +164,13 @@ const handlers = [
     MongooseModule.forRoot(process.env.MONGO_URL!),
     JwtModule.register({}),
     MongooseModule.forFeature([
+      { name: RefreshToken.name, schema: RefreshTokenSchema },
       { name: User.name, schema: UserSchema },
       { name: Blog.name, schema: BlogSchema },
       { name: Post.name, schema: PostSchema },
       { name: Comment.name, schema: CommentSchema },
-      { name: Blog.name, schema: BlogSchema },
-      { name: Post.name, schema: PostSchema },
       { name: LikesInfo.name, schema: LikesInfoSchema },
       { name: CommentatorInfo.name, schema: CommentatorInfoSchema },
-      { name: User.name, schema: UserSchema },
       { name: EmailConfirmation.name, schema: EmailConfirmationSchema },
       { name: PasswordRecovery.name, schema: PasswordRecoverySchema },
       { name: CommentLikesInfo.name, schema: CommentsLikesInfoSchema },

@@ -4,8 +4,12 @@ import { AccessRefreshTokens } from '../jwt.types.service';
 import { JwtQueryRepository } from '../jwt.query.repository';
 import { DevicesRepository } from '../../devices/infrastructure/repository/devices.repository';
 import { CheckIsTokenValidCommand } from './check-is-token-valid.use-case';
-import { RefreshTokenModelType } from '../../auth/domain/refreshToken.schema';
+import {
+  RefreshToken,
+  RefreshTokenModelType,
+} from '../../auth/domain/refreshToken.schema';
 import { AuthRepository } from '../../auth/infrastructure/repository/auth.repository';
+import { InjectModel } from '@nestjs/mongoose';
 
 export class ChangeTokenByRefreshTokenCommand {
   constructor(
@@ -23,6 +27,7 @@ export class ChangeTokenByRefreshTokenUseCase
     protected jwtQueryRepository: JwtQueryRepository,
     protected devicesRepository: DevicesRepository,
     protected commandBus: CommandBus,
+    @InjectModel(RefreshToken.name)
     private refreshTokenModel: RefreshTokenModelType,
     private authRepository: AuthRepository,
   ) {}
