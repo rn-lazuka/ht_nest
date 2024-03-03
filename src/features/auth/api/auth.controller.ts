@@ -22,7 +22,7 @@ import {
   NewPasswordModel,
   PasswordRecoveryModel,
 } from './models/input/password-flow-auth.input.model';
-import { SkipThrottle } from '@nestjs/throttler';
+import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 import { JwtRefreshGuard } from '../../../infrastructure/guards/jwt-refresh.guard';
 import { RefreshToken } from '../../../infrastructure/decorators/auth/refresh-token-param.decorator';
 import { ValidateEmailResendingGuard } from '../../../infrastructure/guards/validation-guards/validate-email-resending.guard';
@@ -42,6 +42,7 @@ import { CreateNewDeviceCommand } from '../../devices/use-cases/create-new-devic
 import { ChangeTokenByRefreshTokenCommand } from '../../jwt/use-cases/change-token-by-refresh-token.use-case';
 
 @Controller('/auth')
+@UseGuards(ThrottlerGuard)
 export class AuthController {
   constructor(
     protected commandBus: CommandBus,
@@ -184,6 +185,7 @@ export class AuthController {
     }
   }
 
+  @SkipThrottle()
   @Post('new-password')
   async saveNewPassword(
     @Body() inputInfo: NewPasswordModel,

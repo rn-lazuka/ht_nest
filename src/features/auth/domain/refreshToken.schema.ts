@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { HydratedDocument, Model } from 'mongoose';
-import { CreateRefreshTokenModel } from '../api/models/input/refreshToken.input.mpdel';
+import { CreateRefreshTokenModel } from '../api/models/input/refreshToken.input.model';
 
 @Schema()
 export class RefreshToken {
