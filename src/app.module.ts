@@ -48,8 +48,7 @@ import { BasicStrategy } from './infrastructure/strategy/basic.strategy';
 import { EmailManager } from './infrastructure/managers/email-manager';
 import { CryptoAdapter } from './infrastructure/adapters/crypto.adapter';
 import { EmailAdapter } from './infrastructure/adapters/email.adapter';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import {
   CommentLikesInfo,
   CommentsLikesInfoSchema,
@@ -207,12 +206,6 @@ const handlers = [
 
     //handlers
     ...handlers,
-
-    //Throttler
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
   ],
 })
 export class AppModule {}

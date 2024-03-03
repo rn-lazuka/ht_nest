@@ -22,7 +22,7 @@ import {
   NewPasswordModel,
   PasswordRecoveryModel,
 } from './models/input/password-flow-auth.input.model';
-import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
+import { SkipThrottle, Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { JwtRefreshGuard } from '../../../infrastructure/guards/jwt-refresh.guard';
 import { RefreshToken } from '../../../infrastructure/decorators/auth/refresh-token-param.decorator';
 import { ValidateEmailResendingGuard } from '../../../infrastructure/guards/validation-guards/validate-email-resending.guard';
