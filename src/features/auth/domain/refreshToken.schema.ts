@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { HydratedDocument, Model } from 'mongoose';
-import { User, UserSchema } from '../../users/userSchema';
 import { CreateRefreshTokenModel } from '../api/models/input/refreshToken.input.mpdel';
 
 @Schema()
@@ -21,8 +20,8 @@ export class RefreshToken {
 
 export const RefreshTokenSchema = SchemaFactory.createForClass(RefreshToken);
 
-UserSchema.statics = {
-  createInstance: User.createInstance,
+RefreshTokenSchema.statics = {
+  createInstance: RefreshToken.createInstance,
 };
 
 type RefreshTokenModelStaticMethodsType = {
